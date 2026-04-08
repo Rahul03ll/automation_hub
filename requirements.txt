@@ -1,0 +1,33 @@
+# Automation Hub — Python Dependencies
+# Install: pip install -r requirements.txt
+
+# Web scraping
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+lxml>=4.9.0
+urllib3>=2.0.0
+
+# PDF processing
+pdfplumber>=0.10.0
+pypdf>=3.0.0
+Pillow>=10.0.0          # For image extraction from PDFs
+
+# Data handling & export
+pandas>=2.0.0
+openpyxl>=3.1.0         # Excel export support
+
+# AI summarization (Gemini via REST; no SDK required)
+
+# Utilities
+python-dotenv>=1.0.0
+tqdm>=4.66.0            # Progress bars
+colorlog>=6.7.0         # Colored logging output
+
+# Web app
+fastapi>=0.115.0
+uvicorn>=0.30.0
+python-multipart>=0.0.9
+celery>=5.4.0
+redis>=5.0.0
+gunicorn>=23.0.0
+SQLAlchemy>=2.0.0

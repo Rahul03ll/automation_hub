@@ -1,0 +1,51 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg
+*.egg-info/
+dist/
+build/
+*.so
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Environment / secrets
+.env
+*.env
+app.db
+*.db
+
+# Output files (generated)
+output/
+scraped_*.json
+scraped_*.csv
+scraped_*.txt
+scraped_*.md
+pdf_output_*.txt
+pdf_output_*.json
+pdf_output_*.md
+pdf_output_*.csv
+pipeline_manifest_*.json
+downloaded_*.pdf
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Pytest
+.pytest_cache/
+.coverage
+htmlcov/

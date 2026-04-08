@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Automation Hub Web App</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 24px; background: #f7f7f8; color: #222; }
+    h1 { margin-bottom: 8px; }
+    .grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+    .card { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 16px; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+    label { font-size: 12px; font-weight: 700; display: block; margin-bottom: 4px; }
+    input, select, textarea, button { width: 100%; padding: 8px; box-sizing: border-box; }
+    button { cursor: pointer; font-weight: 700; }
+    pre { background: #101218; color: #d9e0ee; padding: 12px; border-radius: 6px; overflow-x: auto; }
+    .ok { color: #0a7a23; }
+    .err { color: #b42318; }
+    @media (min-width: 1100px) { .grid { grid-template-columns: 1fr 1fr 1fr; } }
+  </style>
+</head>
+<body>
+  <h1>Automation Hub</h1>
+  <p>Run scraper, PDF processor, and pipeline from one web UI.</p>
+
+  <div class="grid">
+    <section class="card">
+      <h2>Web Scraper</h2>
+      <div class="row">
+        <div>
+          <label>URL</label>
+          <input id="scrape_url" value="https://en.wikipedia.org/wiki/Line_(software)" />
+        </div>
+        <div>
+          <label>Mode</label>
+          <select id="scrape_mode">
+            <option>all</option><option>essential</option><option>links</option><option>text</option>
+            <option>images</option><option>tables</option><option>meta</option><option>custom</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Format</label>
+          <select id="scrape_format"><option>json</option><option>csv</option><option>txt</option><option>md</option></select>
+        </div>
+        <div>
+          <label>Selector (custom mode)</label>
+          <input id="scrape_selector" placeholder="article h2" />
+        </div>
+      </div>
+      <button onclick="runScrape()">Run Scraper</button>
+      <pre id="scrape_out"></pre>
+    </section>
+
+    <section class="card">
+      <h2>PDF Processor</h2>
+      <div class="row">
+        <div>
+          <label>PDF URL (or upload file below)</label>
+          <input id="pdf_url" placeholder="https://example.com/file.pdf" />
+        </div>
+        <div>
+          <label>Upload PDF</label>
+          <input id="pdf_file" type="file" accept=".pdf,application/pdf" />
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Operation</label>
+          <select id="pdf_op"><option>all</option><option>extract</option><option>summarize</option><option>tables</option></select>
+        </div>
+        <div>
+          <label>Format</label>
+          <select id="pdf_format"><option>md</option><option>json</option><option>txt</option><option>csv</option></select>
+        </div>
+      </div>
+      <button onclick="runPdf()">Run PDF Processor</button>
+      <pre id="pdf_out"></pre>
+    </section>
+
+    <section class="card">
+      <h2>Automation Pipeline</h2>
+      <div class="row">
+        <div>
+          <label>URL</label>
+          <input id="pipe_url" value="https://en.wikipedia.org/wiki/Line_(software)" />
+        </div>
+        <div>
+          <label>Scrape Mode</label>
+          <select id="pipe_mode"><option>all</option><option>links</option><option>text</option><option>essential</option></select>
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Scrape Format</label>
+          <select id="pipe_format"><option>json</option><option>md</option><option>txt</option><option>csv</option></select>
+        </div>
+        <div>
+          <label>Follow PDFs</label>
+          <select id="pipe_follow"><option value="false">false</option><option value="true">true</option></select>
+        </div>
+      </div>
+      <button onclick="runPipeline()">Run Pipeline</button>
+      <pre id="pipe_out"></pre>
+    </section>
+  </div>
+
+  <script>
+    function pretty(obj) { return JSON.stringify(obj, null, 2); }
+
+    async function runScrape() {
+      const out = document.getElementById('scrape_out');
+      out.textContent = 'Running...';
+      const payload = {
+        url: document.getElementById('scrape_url').value.trim(),
+        mode: document.getElementById('scrape_mode').value,
+        format: document.getElementById('scrape_format').value,
+        selector: document.getElementById('scrape_selector').value.trim()
+      };
+      const res = await fetch('/api/scrape', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      const data = await res.json();
+      out.textContent = pretty(data);
+    }
+
+    async function runPdf() {
+      const out = document.getElementById('pdf_out');
+      out.textContent = 'Running...';
+      const fd = new FormData();
+      fd.append('op', document.getElementById('pdf_op').value);
+      fd.append('fmt', document.getElementById('pdf_format').value);
+      const url = document.getElementById('pdf_url').value.trim();
+      const file = document.getElementById('pdf_file').files[0];
+      if (url) fd.append('source_url', url);
+      if (file) fd.append('source_file', file);
+      const res = await fetch('/api/pdf', { method: 'POST', body: fd });
+      const data = await res.json();
+      out.textContent = pretty(data);
+    }
+
+    async function runPipeline() {
+      const out = document.getElementById('pipe_out');
+      out.textContent = 'Running...';
+      const payload = {
+        url: document.getElementById('pipe_url').value.trim(),
+        scrape_mode: document.getElementById('pipe_mode').value,
+        scrape_format: document.getElementById('pipe_format').value,
+        follow_pdfs: document.getElementById('pipe_follow').value === 'true'
+      };
+      const res = await fetch('/api/pipeline', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+      const data = await res.json();
+      out.textContent = pretty(data);
+    }
+  </script>
+</body>
+</html>

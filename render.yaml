@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: automation-hub-web
+    env: docker
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: REQUIRE_API_KEY
+        value: "true"
+      - key: CELERY_BROKER_URL
+        value: redis://automation-hub-redis:6379/0
+      - key: CELERY_RESULT_BACKEND
+        value: redis://automation-hub-redis:6379/1
+
+  - type: worker
+    name: automation-hub-worker
+    env: docker
+    dockerfilePath: ./Dockerfile
+    dockerCommand: celery -A tasks.celery_app worker --loglevel=INFO --concurrency=2
+    envVars:
+      - key: REQUIRE_API_KEY
+        value: "true"
+      - key: CELERY_BROKER_URL
+        value: redis://automation-hub-redis:6379/0
+      - key: CELERY_RESULT_BACKEND
+        value: redis://automation-hub-redis:6379/1
+
+  - type: redis
+    name: automation-hub-redis
+    ipAllowList: []
