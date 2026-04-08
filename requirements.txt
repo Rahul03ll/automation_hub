@@ -18,6 +18,9 @@ openpyxl>=3.1.0         # Excel export support
 
 # AI summarization (Gemini via REST; no SDK required)
 
+# Testing
+pytest>=7.0.0
+
 # Utilities
 python-dotenv>=1.0.0
 tqdm>=4.66.0            # Progress bars
