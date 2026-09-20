@@ -1,212 +1,216 @@
-# Automation Hub — Web Scraper + PDF Processor
+# Automation Hub ⚡
 
-A production-ready Python automation toolkit for web scraping and PDF processing, with AI summarization via Gemini.
+<div align="center">
 
-[![CI](https://img.shields.io/badge/ci-github%20actions-blue)](#)
-[![Python](https://img.shields.io/badge/python-3.8%2B-blue)](#)
-[![License](https://img.shields.io/badge/license-MIT-green)](#)
+[![Python](https://img.shields.io/badge/Python-3.8%2B%20%7C%203.12-3776AB.svg?logo=python&logoColor=white)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115%2B-009688.svg?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED.svg?logo=docker&logoColor=white)](https://www.docker.com/)
+[![Kubernetes](https://img.shields.io/badge/Kubernetes-K8s_Ready-326CE5.svg?logo=kubernetes&logoColor=white)](https://kubernetes.io/)
+[![Celery & Redis](https://img.shields.io/badge/Celery%20%26%20Redis-Distributed_Tasks-37814A.svg?logo=celery&logoColor=white)](https://docs.celeryq.dev/)
+[![Gemini AI](https://img.shields.io/badge/Google%20Gemini-AI_Summarization-8E75B2.svg?logo=google&logoColor=white)](https://ai.google.dev/)
+[![Tests](https://img.shields.io/badge/Tests-68%20Passing-brightgreen.svg?logo=pytest&logoColor=white)](#-automated-testing)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Author](https://img.shields.io/badge/Author-Rahul_Roy-blueviolet.svg?logo=github)](https://github.com/Rahul03ll)
 
-Table of contents
-- Overview
-- Features
-- Project structure
-- Quickstart
-- Installation
-- Configuration / Environment
-- CLI reference & examples
-- Web API (FastAPI) usage
-- Output layout
-- Deployment (Docker & Compose)
-- Testing & CI
-- Development workflow
-- Contributing
-- Troubleshooting & FAQ
-- Security
-- License
-- Changelog
+**Production-grade distributed web scraping, PDF intelligence, and pipeline orchestration engine with Google Gemini AI.**  
+*Engineered with FastAPI, Celery, Redis, Docker, and Kubernetes for resilient cloud-native data workflows.*
+
+</div>
 
 ---
 
-## Overview
+## 📌 Overview
 
-Automation Hub is an end-to-end toolkit that:
-- Scrapes web pages (links, text, images, tables, meta).
-- Processes PDFs (text extraction, table extraction, AI-powered summarization).
-- Orchestrates scraping + PDF processing pipelines.
-- Exposes both CLI entrypoints and a FastAPI web service with async/background jobs (Celery + Redis).
-- Is designed to be deployable and horizontally scalable.
+**Automation Hub** is an end-to-end data extraction and document intelligence platform designed to handle complex ingestion workflows at scale:
 
-Use cases:
-- Content ingestion for analytics
-- Bulk PDF processing and automatic summarization
-- Building searchable content stores and reports
-- As a foundation for crawling + extracting structured data
+- 🕷️ **Multi-Mode Web Scraper**: High-performance HTTP client with automated retries, rate-limiting, politeness delays, SSL fallback, and selector-based structured extraction (links, text, tables, images, metadata).
+- 📄 **PDF Intelligence & Extraction Engine**: Structured text extraction, tabular data extraction via `pdfplumber`, automatic format conversion (`json`, `csv`, `md`, `txt`), and content summarization powered by Google Gemini AI.
+- 🔄 **Unified Pipeline Orchestrator**: Traverses web domains, discovers linked PDF documents, downloads and ingests them into structured formats, and generates comprehensive machine-readable run manifests.
+- ⚡ **Asynchronous Microservice (FastAPI + Celery + Redis)**: Exposes high-throughput REST endpoints, persistent job tracking via SQLite/SQLAlchemy, and background task queues with automated synchronous fallbacks.
+- 🐳 **Enterprise Container & Orchestration Ready**: Packaged with multi-stage `Dockerfile`, `docker-compose.yml`, and production-grade Kubernetes (`k8s/`) deployment manifests.
 
 ---
 
-## Features
+## 🏗️ System Architecture
 
-- Robust HTTP fetcher with retries, timeouts and optional politeness delays.
-- HTML parsing with CSS selectors and multiple extraction modes.
-- PDF reading via pdfplumber with table detection and CSV export.
-- AI summarization using Google Generative Language (Gemini) REST API (configurable model & prompt).
-- Command-line entrypoints:
-  - `web_scraper.py`, `pdf_processor.py`, `automation_pipeline.py`
-- FastAPI backend with async job endpoints and job history persisted in SQLite.
-- Docker + docker-compose manifests for production-like deployment.
-- CI workflow for linting, tests and packaging.
+```
+                               ┌──────────────────────────────────────────────┐
+                               │               Client Request                 │
+                               │        (CLI / REST API / Web UI)             │
+                               └──────────────────────┬───────────────────────┘
+                                                      │
+                         ┌────────────────────────────┴────────────────────────────┐
+                         ▼                                                         ▼
+           ┌────────────────────────────┐                            ┌────────────────────────────┐
+           │   CLI Pipeline Engine      │                            │     FastAPI Web Service    │
+           │  automation_pipeline.py    │                            │         (webapp.py)        │
+           └─────────────┬──────────────┘                            └─────────────┬──────────────┘
+                         │                                                         │
+                         ├────────────────────────────────────────┬────────────────┘
+                         ▼                                        ▼
+           ┌────────────────────────────┐           ┌────────────────────────────┐
+           │     Web Scraper Engine     │           │   Celery Distributed Queue │
+           │   (fetcher / parser)       │           │      (Redis Broker)        │
+           └─────────────┬──────────────┘           └─────────────┬──────────────┘
+                         │                                        │
+                         ▼                                        ▼
+           ┌────────────────────────────┐           ┌────────────────────────────┐
+           │   PDF Processing Engine    │           │      Worker Execution      │
+           │  (reader / table_extract)  │           │         (tasks.py)         │
+           └─────────────┬──────────────┘           └─────────────┬──────────────┘
+                         │                                        │
+                         ▼                                        │
+           ┌────────────────────────────┐                         │
+           │   Google Gemini AI Engine  │ ◄───────────────────────┘
+           │ (Summarization & Synthesis)│
+           └─────────────┬──────────────┘
+                         │
+                         ▼
+        ┌────────────────────────────────────────────────────────┐
+        │                 Output Artifacts Store                 │
+        │  • Structured JSON / CSV / Markdown Exports           │
+        │  • Pipeline Execution Manifest (pipeline_manifest.json)│
+        │  • SQLite Job History (app_db.py)                      │
+        └────────────────────────────────────────────────────────┘
+```
 
 ---
 
-## Project structure
+## ✨ Key Features
+
+| Capability | Technical Details |
+|---|---|
+| **Resilient Scraping** | Exponential backoff, configurable timeouts, custom user agents, TLS fallback, and DOM sanitization to strip script/style noise. |
+| **Table & Data Extraction** | Deterministic table identification and alignment into clean Markdown tables or CSV records. |
+| **Google Gemini Integration** | Context-aware document summarization using Gemini 1.5 Flash / Pro REST API with retry cascades on rate limits (HTTP 429). |
+| **Zero-Lock Pipeline** | Orchestrates crawling → link filtering → PDF downloading → parsing → AI summarization → manifest generation in a single command. |
+| **Async Task Workers** | Distributed job processing powered by Celery & Redis, with zero-downtime graceful fallback to synchronous execution if brokers are offline. |
+| **Database Audit Trail** | Persistent job run metadata, timestamps, input parameters, and completion statuses tracked via SQLAlchemy. |
+| **Cloud-Native Deployment** | Production Dockerfile, multi-worker Docker Compose setup, and declarative Kubernetes deployments & services. |
+
+---
+
+## 📂 Project Structure
 
 ```
 automation_hub/
-├── README.md
-├── requirements.txt
-├── .env.example
 ├── config/
-│   └── settings.py
+│   └── settings.py             # Centralized settings & environment loader with native fallback
 ├── scraper/
-│   ├── __init__.py
-│   ├── fetcher.py
-│   ├── parser.py
-│   └── exporter.py
+│   ├── fetcher.py              # HTTP client with retries, politeness delays & SSL handling
+│   ├── parser.py               # BeautifulSoup parser & CSS selector extraction
+│   └── exporter.py             # Exporters for JSON, CSV, Markdown, and plain text
 ├── pdf_processor/
-│   ├── __init__.py
-│   ├── reader.py
-│   ├── table_extractor.py
-│   └── summarizer.py
+│   ├── reader.py               # PDF validation, page range parsing & text reader
+│   ├── table_extractor.py      # Tabular data extractor & Markdown/CSV converter
+│   └── summarizer.py           # Google Gemini AI document summarization client
 ├── pipeline/
-│   ├── __init__.py
-│   └── runner.py
-├── tests/
-│   ├── test_scraper.py
-│   ├── test_pdf.py
-│   └── test_pipeline.py
-├── web_scraper.py
-├── pdf_processor.py
-├── automation_pipeline.py
-├── webapp.py
-└── automation_pipeline.py
+│   └── runner.py               # End-to-end web scrape + PDF ingestion orchestrator
+├── webapp_static/              # Web dashboard frontend SPA
+├── k8s/                        # Kubernetes manifests (deployments, services, configs)
+├── tests/                      # Comprehensive test suite (68 unit & integration tests)
+│   ├── test_scraper.py         # DOM parsing & export test suites
+│   ├── test_pdf.py             # PDF reader, range parsing & exporter tests
+│   ├── test_pipeline.py        # Pipeline orchestrator & CLI integration tests
+│   └── test_summarizer.py      # Gemini API model fallback & retry tests
+├── web_scraper.py              # Standalone web scraper CLI entrypoint
+├── pdf_processor.py            # Standalone PDF processing & summarization CLI
+├── automation_pipeline.py      # Unified crawler & PDF pipeline CLI
+├── webapp.py                   # FastAPI REST API & Web Application
+├── tasks.py                    # Celery background task definitions
+├── app_db.py                   # SQLAlchemy database models & job tracking
+├── docker-compose.yml          # Multi-container web + worker + redis stack
+├── Dockerfile                  # Production container build specification
+├── requirements.txt            # Python dependencies
+├── .env.example                # Sample environment configuration template
+├── LICENSE                     # MIT License
+└── README.md                   # Project documentation
 ```
 
 ---
 
-## Quickstart
+## 🚀 Quickstart
 
-1. Install dependencies:
+### Prerequisites
+* Python 3.8+ (Python 3.10 / 3.12 recommended)
+* Optional: Google Gemini API key (`GOOGLE_API_KEY`) for AI summarization features.
+
+### 1. Installation
+
 ```bash
+# Clone the repository
+git clone https://github.com/Rahul03ll/automation_hub.git
+cd automation_hub
+
+# Create and activate virtual environment
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-2. Copy and edit environment variables:
+### 2. Environment Configuration
+
 ```bash
 cp .env.example .env
-# Edit .env and add your GOOGLE_API_KEY and other vars
 ```
 
-3. Run the scraper:
-```bash
-python web_scraper.py --url https://example.com --mode all --format json
-```
+Key environment variables:
+```ini
+# Google Generative Language API (for PDF AI summarization)
+GOOGLE_API_KEY=your_gemini_api_key_here
+GOOGLE_MODEL=gemini-1.5-flash
 
-4. Process a PDF:
-```bash
-python pdf_processor.py --file report.pdf --op all --format md
-```
-
-5. Run full pipeline:
-```bash
-python automation_pipeline.py --url https://example.com --output-dir ./output
-```
-
-6. Run web app (development):
-```bash
-pip install -r requirements.txt
-python -m uvicorn webapp:app --reload
-# Open http://127.0.0.1:8000
-```
-
-Note: Use `python -m uvicorn` to ensure worker uses same environment as dependencies.
-
----
-
-## Installation
-
-- Recommended: Python 3.8+
-- Create virtual environment:
-```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-```
-- Key dependencies:
-  - requests, beautifulsoup4 — scraping
-  - pdfplumber — PDF text & table extraction
-  - pandas — data handling & CSV export
-  - python-dotenv — env var management
-  - fastapi, uvicorn, gunicorn — web service
-  - celery, redis — async job processing
-  - (Gemini) Google Generative Language REST API client or just use requests
-
----
-
-## Configuration / Environment
-
-Copy `.env.example` to `.env` and set values:
-
-- GOOGLE_API_KEY — required for AI summarization (Gemini).
-- ADMIN_API_KEY — bootstrap admin key for web API auth.
-- APP_DB_PATH — path to SQLite DB (default `app.db`).
-- SCRAPER_DELAY — default delay between requests (seconds).
-- SCRAPER_TIMEOUT — default request timeout.
-- LOG_LEVEL — `DEBUG`, `INFO`, `WARNING`, `ERROR`.
-
-Example `.env`:
-```
-GOOGLE_API_KEY=your_key_here
-ADMIN_API_KEY=changeme
+# API & Security
+ADMIN_API_KEY=your_secret_admin_key
 APP_DB_PATH=app.db
-SCRAPER_DELAY=0
-SCRAPER_TIMEOUT=15
-LOG_LEVEL=INFO
-```
 
-Security note: Do not commit `.env` with secrets to source control.
+# Scraper Settings
+SCRAPER_TIMEOUT=15
+SCRAPER_RETRIES=3
+SCRAPER_DELAY=0.5
+SCRAPER_VERIFY_SSL=true
+
+# Output Directory
+OUTPUT_DIR=./output
+```
 
 ---
 
-## CLI Reference & Examples
+## 💻 CLI Usage & Examples
 
-web_scraper.py
-- Arguments
-  - `--url` (required)
-  - `--mode` (all, links, text, images, tables, meta, custom) — default `all`
-  - `--selector` — CSS selector for custom mode
-  - `--format` — `json`, `csv`, `txt`, `md` (default `json`)
-  - `--output-dir` — default `./output`
-  - `--delay`, `--retries`, `--timeout`
-Example:
+### 1. Web Scraper (`web_scraper.py`)
+Extract content from web pages across multiple extraction modes (`all`, `links`, `text`, `images`, `tables`, `meta`, `custom`):
+
 ```bash
-python web_scraper.py --url https://example.com --mode text --format md --output-dir ./output
+# Extract all page elements and export to JSON
+python web_scraper.py --url https://example.com --mode all --format json
+
+# Extract text only and export as Markdown
+python web_scraper.py --url https://news.ycombinator.com --mode text --format md
+
+# Targeted extraction using custom CSS selectors
+python web_scraper.py --url https://example.com --mode custom --selector "article.main-content" --format json
 ```
 
-pdf_processor.py
-- Arguments
-  - `--file` (required) or `--url` (direct PDF URL)
-  - `--op` (`extract`, `summarize`, `tables`, `all`) — default `all`
-  - `--pages` (`all`, `1-5`, `1,3,7`) — default `all`
-  - `--format` (`txt`, `json`, `md`, `csv`) — default `md`
-  - `--ai-prompt`, `--model` (default `gemini-1.5-flash`)
-Example (summarize first 3 pages):
+### 2. PDF Processor (`pdf_processor.py`)
+Inspect, extract text/tables, and summarize PDF documents from local files or remote URLs:
+
 ```bash
-python pdf_processor.py --file report.pdf --op summarize --pages 1-3 --format md
+# Extract text & tables from local PDF to Markdown
+python pdf_processor.py --file document.pdf --op all --format md
+
+# Extract tables only from specific pages to CSV
+python pdf_processor.py --file financial_report.pdf --op tables --pages 5-12 --format csv
+
+# Process remote PDF with Gemini AI executive summarization
+python pdf_processor.py --url https://example.com/annual_report.pdf --op summarize --model gemini-1.5-flash
 ```
 
-automation_pipeline.py
-- Orchestrates scraping and pdf processing
-Example:
+### 3. Unified Orchestration Pipeline (`automation_pipeline.py`)
+Crawl web pages, discover linked PDFs, download, ingest, and summarize them end-to-end:
+
 ```bash
 python automation_pipeline.py \
   --url https://example.com \
@@ -217,139 +221,95 @@ python automation_pipeline.py \
 
 ---
 
-## Web API (FastAPI) usage
+## 🌐 Web API Service (FastAPI)
 
-API endpoints:
-- POST /api/scrape — run a scrape (sync or async)
-- POST /api/pdf — process a PDF
-- POST /api/pipeline — run pipeline
-- POST /api/jobs/scrape — enqueue scrape job (async)
-- POST /api/jobs/pdf — enqueue pdf job (async)
-- POST /api/jobs/pipeline — enqueue pipeline job (async)
-- GET /api/jobs/{job_id} — job status
-- GET /api/jobs/history?limit=50 — job history
-- GET /api/health — health check
+Automation Hub provides a full REST API for programmatic automation:
 
-Auth:
-- API Key required: send header `X-API-Key: <key>`
-- Bootstrap admin via env `ADMIN_API_KEY`
-
-Example curl:
 ```bash
-curl -X POST "http://127.0.0.1:8000/api/scrape" \
-  -H "X-API-Key: your_key" \
-  -H "Content-Type: application/json" \
-  -d '{"url":"https://example.com","mode":"all","format":"json"}'
+# Start FastAPI application
+python -m uvicorn webapp:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-Async job example (fallback behavior):
-- If Redis/Celery are down, async endpoints will fall back to synchronous processing and return `"mode": "sync_fallback"` in the response.
+Interactive API documentation is available at:
+- **Swagger UI**: `http://127.0.0.1:8000/docs`
+- **ReDoc**: `http://127.0.0.1:8000/redoc`
+
+### Key Endpoints
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/api/scrape` | Execute a synchronous web scrape |
+| `POST` | `/api/pdf` | Process uploaded PDF document |
+| `POST` | `/api/pipeline` | Run complete scrape + PDF pipeline |
+| `POST` | `/api/jobs/scrape` | Enqueue background asynchronous scrape |
+| `POST` | `/api/jobs/pdf` | Enqueue background asynchronous PDF task |
+| `GET` | `/api/jobs/{job_id}` | Check status and results of background job |
+| `GET` | `/api/jobs/history` | Retrieve paginated job execution history |
+| `GET` | `/api/health` | Service health check |
 
 ---
 
-## Output layout & file naming
+## 🐳 Docker & Kubernetes Deployment
 
-- `web_scraper.py` writes auto-generated outputs directly under `--output-dir`.
-- `automation_pipeline.py` writes scrape outputs and `pipeline_manifest_*.json` under `--output-dir`.
-- PDF artifacts are kept under `--output-dir/pdf` and downloaded PDFs in `--output-dir/pdfs`.
+### Run with Docker Compose
 
-Example:
-```
-output/
-├── scraped_all_20260408_153045.json
-├── pipeline_manifest_20260408_153045.json
-├── pdf/
-└── pdfs/
-```
+Spin up the complete distributed stack (FastAPI web app + Celery worker + Redis broker):
 
-File names include timestamps to avoid overwriting and to make reproducible pipelines easier to trace.
-
----
-
-## Deployment (Docker & docker-compose)
-
-- Dockerfile builds the web API + static SPA.
-- docker-compose.yml contains:
-  - web (FastAPI + Gunicorn/Uvicorn)
-  - worker (Celery)
-  - redis (broker)
-Usage:
 ```bash
 docker compose up --build
-# scale workers:
+```
+
+Scale worker nodes dynamically:
+```bash
 docker compose up --build --scale worker=3
 ```
 
-If you use managed Redis or DB services, replace service endpoints via env vars in your deployment manifests.
+### Deploy to Kubernetes
 
-Kubernetes manifests (k8s/) are provided for EKS/GKE deployments. Replace image tags and secrets prior to apply.
+Production-ready Kubernetes configurations are located in `k8s/`:
 
----
-
-## Testing & CI
-
-- Unit tests in `tests/` (pytest).
-- Run tests:
 ```bash
-pytest -q
+kubectl apply -f k8s/
 ```
-- GitHub Actions CI workflow in `.github/workflows/ci-cd.yml` runs linting, tests, and package checks.
 
 ---
 
-## Development workflow
+## 🧪 Automated Testing
 
-- Create a branch for each feature/fix:
+The repository features 68 automated unit and integration tests verifying parsers, fetchers, exporters, PDF engines, error recovery, and Gemini AI fallback cascades:
+
 ```bash
-git checkout -b feature/your-feature
+pytest tests/ -v
 ```
-- Run tests locally, add unit tests for changes.
-- Open a pull request against `main` and include a description and testing notes.
+
+```
+============================= test session starts =============================
+platform win32 -- Python 3.12.14, pytest-9.1.1, pluggy-1.6.0
+rootdir: C:\...\automation_hub
+configfile: pytest.ini
+plugins: anyio-4.15.1, mock-3.15.1
+collected 68 items
+
+tests/test_pdf.py ................................                       [ 47%]
+tests/test_pipeline.py ............                                      [ 64%]
+tests/test_scraper.py .....................                              [ 95%]
+tests/test_summarizer.py ...                                             [100%]
+
+============================= 68 passed in 2.12s ==============================
+```
 
 ---
 
-## Contributing
+## 👤 Author & Architecture
 
-1. Fork the repo and create a branch.
-2. Add tests for new features/bug fixes.
-3. Keep changes small and focused.
-4. Follow the repo's code style and run linters.
-
-See CONTRIBUTING.md (create one if it does not exist) for full guidelines.
-
----
-
-## Troubleshooting & FAQ
-
-- Q: The PDF URL returns HTML — what happens?
-  - A: `pdf_processor.py --url` validates `Content-Type` and PDF signature (`%PDF-`). If validation fails it exits with a clear error to prevent mis-parsing HTML.
-- Q: Summaries are poor quality?
-  - A: Tweak `--ai-prompt` and try a different Gemini model via `--model`.
-- Q: Redis unavailable — jobs fail?
-  - A: The async endpoints fall back automatically to synchronous execution and return `"mode":"sync_fallback"`. Check logs and redis health.
+**Rahul Roy**  
+*Final-Year B.Tech CSE, KIIT University*  
+- **GitHub**: [@Rahul03ll](https://github.com/Rahul03ll)  
+- **LinkedIn**: [linkedin.com/in/rahul-roy-362a12256](https://linkedin.com/in/rahul-roy-362a12256)  
+- **Email**: rahulroy2259@gmail.com  
 
 ---
 
-## Security & Privacy
+## 📜 License
 
-- Keep `GOOGLE_API_KEY` and `ADMIN_API_KEY` secret.
-- Avoid sending PII to third-party services unless you are allowed to.
-- For production, secure access with HTTPS, rotate keys regularly, and enforce least-privilege IAM for cloud resources.
-
----
-
-## License
-
-MIT License — see LICENSE file.
-
----
-
-## Changelog
-
-- See CHANGELOG.md for release notes. If not present, add entries for notable changes (features, bugfixes, breaking changes).
-
----
-
-## Contact / Support
-
-Raise issues on the repository. For urgent or paid support, include contact details or an email in a SUPPORT.md file.
+This project is open source and licensed under the [MIT License](LICENSE).

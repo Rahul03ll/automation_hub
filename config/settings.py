@@ -6,10 +6,22 @@ Values are loaded from environment variables (or .env file), with sensible defau
 import os
 import logging
 from pathlib import Path
-from dotenv import load_dotenv
-
-# Load .env if present
-load_dotenv(dotenv_path=Path(__file__).parent.parent / ".env", override=False)
+try:
+    from dotenv import load_dotenv
+    load_dotenv(dotenv_path=Path(__file__).parent.parent / ".env", override=False)
+except ImportError:
+    _env_file = Path(__file__).parent.parent / ".env"
+    if _env_file.exists():
+        try:
+            with open(_env_file, "r", encoding="utf-8") as _f:
+                for _line in _f:
+                    _line = _line.strip()
+                    if _line and not _line.startswith("#") and "=" in _line:
+                        _k, _v = _line.split("=", 1)
+                        if _k.strip() not in os.environ:
+                            os.environ[_k.strip()] = _v.strip().strip("'\"")
+        except Exception:
+            pass
 
 # ── Output ────────────────────────────────────────────────────────────────────
 # Default output directory for all CLI entrypoints (scraper, pdf processor, pipeline).
